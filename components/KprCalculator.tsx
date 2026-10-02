@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
+import { calculateKpr, formatRupiah, KprCalculationResponse } from "@/lib/api";
 
 export default function KprCalculator() {
     const [mortgageType, setMortgageType] = useState<"konvensional" | "syariah">("konvensional");
@@ -8,15 +9,36 @@ export default function KprCalculator() {
     const [dpPercent, setDpPercent] = useState<number>(10);
     const [tenorYears, setTenorYears] = useState<number>(20);
     const [isSuccessNotification, setIsSuccessNotification] = useState(false);
+    const [apiResult, setApiResult] = useState<KprCalculationResponse | null>(null);
+    const [isCalculating, setIsCalculating] = useState(false);
 
-    const rate = mortgageType === "konvensional" ? 0.0488 : 0.0515;
-    const rateDisplay = mortgageType === "konvensional" ? "4.88% p.a" : "5.15% p.a";
-    const rateTitle =
-        mortgageType === "konvensional"
-            ? "Suku Bunga Fixed Promo"
-            : "Margin Flat Murabahah";
+    const fetchApiCalculation = useCallback(async () => {
+        setIsCalculating(true);
+        try {
+            const res = await calculateKpr({
+                propertyPrice: price,
+                dpPercent,
+                tenorYears,
+                isSyariah: mortgageType === "syariah",
+            });
+            setApiResult(res);
+        } catch (err) {
+            console.error("Gagal kalkulasi KPR dari backend:", err);
+        } finally {
+            setIsCalculating(false);
+        }
+    }, [price, dpPercent, tenorYears, mortgageType]);
 
-    const calculation = useMemo(() => {
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            fetchApiCalculation();
+        }, 200);
+
+        return () => clearTimeout(timer);
+    }, [fetchApiCalculation]);
+
+    const localFallback = useMemo(() => {
+        const rate = mortgageType === "konvensional" ? 0.0488 : 0.0515;
         const dpAmount = price * (dpPercent / 100);
         const principal = price - dpAmount;
         const totalMonths = tenorYears * 12;
@@ -35,6 +57,7 @@ export default function KprCalculator() {
 
         const minSalary = monthlyInstallment / 0.4;
         const totalPayment = monthlyInstallment * totalMonths;
+        const totalInterest = totalPayment - principal;
         const principalRatio = Math.min(
             95,
             Math.max(5, Math.round((principal / totalPayment) * 100))
@@ -43,24 +66,28 @@ export default function KprCalculator() {
 
         return {
             dpAmount,
-            principal,
-            totalMonths,
+            loanAmount: principal,
             monthlyInstallment: Math.round(monthlyInstallment),
-            minSalary: Math.round(minSalary),
-            principalRatio,
-            interestRatio,
+            recommendedMinIncome: Math.round(minSalary),
+            principalPercentage: principalRatio,
+            interestPercentage: interestRatio,
+            interestRate: rate,
+            totalPayment: Math.round(totalPayment),
+            totalInterest: Math.round(totalInterest),
         };
-    }, [price, dpPercent, tenorYears, mortgageType, rate]);
+    }, [price, dpPercent, tenorYears, mortgageType]);
 
-    const formatRupiah = (val: number) => {
-        return new Intl.NumberFormat("id-ID", {
-            style: "currency",
-            currency: "IDR",
-            maximumFractionDigits: 0,
-        })
-            .format(val)
-            .replace("IDR", "Rp");
-    };
+    const activeData = apiResult || localFallback;
+
+    const rateDisplay =
+        mortgageType === "konvensional"
+            ? `${((activeData.interestRate || 0.0488) * 100).toFixed(2)}% p.a`
+            : `${((activeData.interestRate || 0.0515) * 100).toFixed(2)}% p.a`;
+
+    const rateTitle =
+        mortgageType === "konvensional"
+            ? "Suku Bunga Fixed Promo (API)"
+            : "Margin Flat Murabahah (API)";
 
     const handleApply = () => {
         setIsSuccessNotification(true);
@@ -74,14 +101,14 @@ export default function KprCalculator() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col items-center text-center gap-2 max-w-2xl mx-auto mb-12">
                     <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-bold">
-                        Kalkulator Simulasi Finansial
+                        Kalkulator Simulasi Finansial Terintegrasi
                     </span>
                     <h2 className="font-headline-xl text-headline-xl-mobile lg:text-headline-xl text-primary font-bold">
                         Simulasi KPR Instan &amp; Akurat
                     </h2>
                     <p className="font-body-md text-body-md text-on-surface-variant">
-                        Hitung estimasi cicilan per bulan dan uji rasio Debt Service Ratio
-                        (DSR) keuangan Anda sebelum berkas diajukan ke perbankan.
+                        Dihitung langsung melalui modul simulasi perbankan NusaProperty untuk
+                        menguji rasio Debt Service Ratio (DSR) sebelum berkas diajukan.
                     </p>
                 </div>
                 <div className="bg-surface-container-lowest rounded-3xl p-6 lg:p-10 shadow-xl border border-surface-container">
@@ -127,7 +154,7 @@ export default function KprCalculator() {
                                     step={5000000}
                                     value={price}
                                     onChange={(e) => setPrice(Number(e.target.value))}
-                                    className="w-full cursor-pointer"
+                                    className="w-full cursor-pointer accent-primary"
                                 />
                                 <div className="flex justify-between font-label-sm text-label-sm text-outline-variant">
                                     <span>Rp 185 Jt (Subsidi)</span>
@@ -148,7 +175,7 @@ export default function KprCalculator() {
                                             /{" "}
                                         </span>
                                         <span className="font-label-md text-label-md font-bold text-primary tabular-numbers">
-                                            {formatRupiah(calculation.dpAmount)}
+                                            {formatRupiah(activeData.dpAmount)}
                                         </span>
                                     </div>
                                 </div>
@@ -159,7 +186,7 @@ export default function KprCalculator() {
                                     step={1}
                                     value={dpPercent}
                                     onChange={(e) => setDpPercent(Number(e.target.value))}
-                                    className="w-full cursor-pointer"
+                                    className="w-full cursor-pointer accent-primary"
                                 />
                                 <div className="flex justify-between font-label-sm text-label-sm text-outline-variant">
                                     <span>Min 5%</span>
@@ -172,7 +199,7 @@ export default function KprCalculator() {
                                         Jangka Waktu (Tenor)
                                     </label>
                                     <span className="font-headline-sm text-headline-sm font-bold text-primary">
-                                        {tenorYears} Tahun ({calculation.totalMonths} Bulan)
+                                        {tenorYears} Tahun ({tenorYears * 12} Bulan)
                                     </span>
                                 </div>
                                 <input
@@ -182,7 +209,7 @@ export default function KprCalculator() {
                                     step={1}
                                     value={tenorYears}
                                     onChange={(e) => setTenorYears(Number(e.target.value))}
-                                    className="w-full cursor-pointer"
+                                    className="w-full cursor-pointer accent-primary"
                                 />
                                 <div className="flex justify-between font-label-sm text-label-sm text-outline-variant">
                                     <span>5 Tahun</span>
@@ -197,11 +224,16 @@ export default function KprCalculator() {
                                         </span>
                                     </div>
                                     <div>
-                                        <p className="font-label-md text-label-md text-on-surface font-semibold">
-                                            {rateTitle}
-                                        </p>
+                                        <div className="flex items-center gap-2">
+                                            <p className="font-label-md text-label-md text-on-surface font-semibold">
+                                                {rateTitle}
+                                            </p>
+                                            {isCalculating && (
+                                                <span className="w-2 h-2 rounded-full bg-secondary animate-ping" />
+                                            )}
+                                        </div>
                                         <p className="font-body-sm text-body-sm text-on-surface-variant">
-                                            Mitra Terpilih: BTN, Mandiri, BCA &amp; BSI 2025
+                                            Sinkronisasi API: BTN, Mandiri, BCA &amp; BSI
                                         </p>
                                     </div>
                                 </div>
@@ -210,16 +242,23 @@ export default function KprCalculator() {
                                 </span>
                             </div>
                         </div>
-                        <div className="lg:col-span-5 bg-primary text-on-primary rounded-2xl p-6 lg:p-8 shadow-xl flex flex-col gap-6">
+                        <div className="lg:col-span-5 bg-primary text-on-primary rounded-2xl p-6 lg:p-8 shadow-xl flex flex-col gap-6 relative">
                             <div>
-                                <span className="font-label-sm text-label-sm uppercase tracking-wider text-primary-fixed-dim font-bold">
-                                    Hasil Estimasi Kredit
-                                </span>
+                                <div className="flex items-center justify-between">
+                                    <span className="font-label-sm text-label-sm uppercase tracking-wider text-primary-fixed-dim font-bold">
+                                        Hasil Estimasi Kredit Resmi
+                                    </span>
+                                    {apiResult && (
+                                        <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-label-sm text-[11px] font-bold">
+                                            Backend Verified
+                                        </span>
+                                    )}
+                                </div>
                                 <p className="font-headline-sm text-headline-sm text-on-primary font-normal mt-1">
                                     Angsuran Bulanan
                                 </p>
                                 <h3 className="font-display-lg text-display-lg-mobile sm:text-display-lg text-secondary-container font-bold tracking-tight mt-1 tabular-numbers">
-                                    {formatRupiah(calculation.monthlyInstallment)}
+                                    {formatRupiah(activeData.monthlyInstallment)}
                                     <span className="text-xl sm:text-2xl font-normal text-surface-container-highest">
                                         {" "}
                                         / bln
@@ -234,7 +273,7 @@ export default function KprCalculator() {
                                     Rekomendasi Gaji Minimum (Single/Joint)
                                 </span>
                                 <p className="font-headline-sm text-headline-sm font-bold text-on-primary tabular-numbers">
-                                    {formatRupiah(calculation.minSalary)}
+                                    {formatRupiah(activeData.recommendedMinIncome)}
                                 </p>
                                 <span className="font-body-sm text-body-sm text-surface-variant text-[12px]">
                                     *DSR perbankan sehat maks. 40% dari total penghasilan bersih.
@@ -245,23 +284,23 @@ export default function KprCalculator() {
                                     <span className="text-surface-variant">
                                         Pokok Pinjaman:{" "}
                                         <strong className="text-on-primary tabular-numbers">
-                                            {formatRupiah(calculation.principal)}
+                                            {formatRupiah(activeData.loanAmount)}
                                         </strong>
                                     </span>
                                     <span className="text-secondary-fixed">
-                                        Porsi Bunga ({calculation.interestRatio}%)
+                                        Porsi Bunga ({Math.round(activeData.interestPercentage)}%)
                                     </span>
                                 </div>
                                 <div className="w-full h-3 bg-tertiary rounded-full overflow-hidden flex">
                                     <div
                                         className="bg-primary-fixed h-full transition-all duration-300"
-                                        style={{ width: `${calculation.principalRatio}%` }}
-                                        title={`Pokok: ${calculation.principalRatio}%`}
+                                        style={{ width: `${activeData.principalPercentage}%` }}
+                                        title={`Pokok: ${activeData.principalPercentage}%`}
                                     />
                                     <div
                                         className="bg-secondary-container h-full transition-all duration-300"
-                                        style={{ width: `${calculation.interestRatio}%` }}
-                                        title={`Bunga: ${calculation.interestRatio}%`}
+                                        style={{ width: `${activeData.interestPercentage}%` }}
+                                        title={`Bunga: ${activeData.interestPercentage}%`}
                                     />
                                 </div>
                             </div>

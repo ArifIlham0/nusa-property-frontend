@@ -15,14 +15,6 @@ export default function Footer() {
                         <p className="font-body-sm text-body-sm text-surface-variant max-w-sm leading-relaxed">
                             Platform agregator KPR digital dan ekosistem pencarian properti terintegrasi di Indonesia. Menghadirkan simulasi transparan, verifikasi akurat, dan pengajuan kredit hunian yang aman.
                         </p>
-                        <div className="p-3.5 rounded-xl bg-tertiary/60 border border-outline/30 flex items-start gap-2.5">
-                            <span className="material-symbols-outlined text-secondary-container text-[20px] mt-0.5 flex-shrink-0">
-                                verified_user
-                            </span>
-                            <p className="font-body-sm text-body-sm text-surface-variant text-[12px] leading-relaxed">
-                                Tercatat &amp; diawasi di bawah regulasi ekosistem fintech perbankan nasional berkolaborasi bersama mitra perbankan resmi yang terdaftar dan diawasi oleh Otoritas Jasa Keuangan (OJK) serta Bank Indonesia.
-                            </p>
-                        </div>
                     </div>
                     <div className="lg:col-span-2 flex flex-col gap-3">
                         <span className="font-label-md text-label-md text-on-primary uppercase tracking-wider font-bold">
@@ -77,20 +69,14 @@ export default function Footer() {
                                 location_on
                             </span>
                             <p className="font-body-sm text-body-sm leading-relaxed">
-                                Menara Kadin Indonesia Lt. 18, Jl. H.R. Rasuna Said Blok X-5 Kav. 2-3, Kuningan Timur, Setiabudi, Jakarta Selatan, DKI Jakarta 12950
+                                Menara Kadin Indonesia Lt. 18, Kuningan Timur, Setiabudi, Jakarta Selatan, DKI Jakarta 12950
                             </p>
                         </div>
                         <div className="flex items-center gap-2 text-surface-variant">
                             <span className="material-symbols-outlined text-primary-fixed-dim text-[20px]">
                                 mail
                             </span>
-                            <span className="font-body-sm text-body-sm">halo@nusaproperty.id</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-surface-variant">
-                            <span className="material-symbols-outlined text-primary-fixed-dim text-[20px]">
-                                call
-                            </span>
-                            <span className="font-body-sm text-body-sm">+62 (021) 5299-4300</span>
+                            <span className="font-body-sm text-body-sm">contact@nusaproperty.id</span>
                         </div>
                     </div>
                 </div>
@@ -119,10 +105,7 @@ export default function Footer() {
                     </div>
                 </div>
                 <div className="pt-6 border-t border-outline/20 flex flex-col sm:flex-row items-center justify-between gap-3 text-surface-variant font-body-sm text-body-sm text-[12px]">
-                    <p>© 2025 PT Nusa Properti Digital Indonesia. Terdaftar &amp; Diawasi.</p>
-                    <p className="text-outline-variant">
-                        Banking-grade 256-bit SSL Certified • ISO 27001 Compliant
-                    </p>
+                    <p>© 2026 Nusa Properti</p>
                 </div>
             </div>
         </footer>

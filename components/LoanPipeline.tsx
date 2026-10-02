@@ -17,7 +17,7 @@ export default function LoanPipeline() {
         {
             num: "03",
             title: "Pre-Screening Analis",
-            desc: "Mortgage Advisor NusaProperty mengecek kelayakan BI Checking (SLIK OJK) dan merekomendasikan bank dengan peluang lolos tertinggi.",
+            desc: "Tim analis NusaProperty mengecek kelayakan BI Checking (SLIK OJK) dan merekomendasikan bank dengan peluang lolos tertinggi.",
             icon: "manage_search",
             action: "Review SLIK OJK Cepat",
         },
@@ -41,10 +41,11 @@ export default function LoanPipeline() {
                         Alur Pengajuan KPR Digital Tanpa Ribet
                     </h2>
                     <p className="font-body-md text-body-md text-on-surface-variant">
-                        Dari survei lokasi hingga terbit SP3K resmi, semua dipantau dalam satu
-                        dashboard transparan.
+                        Dari survei lokasi hingga serah terima kunci, kami mendampingi setiap tahap
+                        agar proses kepemilikan rumah impian berjalan transparan dan mudah.
                     </p>
                 </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
                     {steps.map((s, idx) => (
                         <div

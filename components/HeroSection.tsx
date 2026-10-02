@@ -1,10 +1,33 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
+import { fetchFeaturedProperty, PropertyItem } from "@/lib/api";
 
 export default function HeroSection() {
+    const [featured, setFeatured] = useState<PropertyItem | null>(null);
+
+    useEffect(() => {
+        const loadFeatured = async () => {
+            const featData = await fetchFeaturedProperty();
+            if (featData) setFeatured(featData);
+        };
+
+        loadFeatured();
+    }, []);
+
+    const recommendationTitle =
+        featured?.title || "Cluster Botanical Hills A-12";
+    const recommendationInstallment =
+        featured?.installmentEstimate || "Cicilan 2.3 Jt/bln";
+    const recommendationImage =
+        featured?.imageUrl || "/images/cluster-tropical.png";
+
     return (
-        <section id="beranda" className="relative w-full overflow-hidden bg-gradient-to-b from-surface-container-lowest via-surface-container-low/40 to-surface pb-16 pt-6 lg:pt-10">
+        <section
+            id="beranda"
+            className="relative w-full overflow-hidden bg-gradient-to-b from-surface-container-lowest via-surface-container-low/40 to-surface pb-16 pt-6 lg:pt-10"
+        >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
                     <div className="lg:col-span-6 flex flex-col gap-5 z-10">
@@ -32,7 +55,7 @@ export default function HeroSection() {
                                 href="#kalkulator-kpr"
                                 className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-secondary-container text-on-secondary-fixed font-label-lg text-label-lg font-bold shadow-md hover:brightness-105 transition-all cursor-pointer"
                             >
-                                <span>Cek Kelayakan KPR</span>
+                                <span>Simulasi Angsuran</span>
                                 <span className="material-symbols-outlined text-[18px]">
                                     arrow_forward
                                 </span>
@@ -61,7 +84,7 @@ export default function HeroSection() {
                                 <span className="material-symbols-outlined text-secondary text-[20px]">
                                     bolt
                                 </span>
-                                <span>SP3K Ekspres 14 Hari</span>
+                                <span>Proses Ekspres Multi-Bank</span>
                             </div>
                         </div>
                     </div>
@@ -71,8 +94,8 @@ export default function HeroSection() {
                             <div className="relative overflow-hidden rounded-2xl shadow-xl bg-surface-container-lowest">
                                 <div className="relative w-full h-[360px] sm:h-[420px] lg:h-[460px]">
                                     <Image
-                                        src="/images/cluster-tropical.png"
-                                        alt="Modern Tropical Residence NusaProperty"
+                                        src={recommendationImage}
+                                        alt={recommendationTitle}
                                         fill
                                         sizes="(max-width: 1024px) 100vw, 50vw"
                                         className="object-cover hover:scale-105 transition-transform duration-700"
@@ -86,52 +109,50 @@ export default function HeroSection() {
                                             Cluster Rekomendasi
                                         </span>
                                         <p className="font-headline-sm text-headline-sm font-semibold">
-                                            Grand Harmoni Premiere
+                                            {recommendationTitle}
                                         </p>
                                     </div>
                                     <div className="px-3.5 py-1.5 rounded-lg bg-surface-container-lowest/90 backdrop-blur-md text-primary font-label-sm text-label-sm font-bold shadow-sm">
-                                        Cicilan 2.1 Jt/bln
+                                        {recommendationInstallment}
                                     </div>
                                 </div>
                             </div>
+
+                            {/* Floating Feature Badges for Company Profile */}
                             <div className="absolute -top-4 -right-2 sm:-right-4 bg-surface-container-lowest/95 backdrop-blur-md rounded-xl p-3 shadow-xl flex items-center gap-3 border border-surface-container-high animate-bounce [animation-duration:5s]">
                                 <div className="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary">
                                     <span className="material-symbols-outlined text-[22px]">
-                                        verified
+                                        percent
                                     </span>
                                 </div>
                                 <div className="flex flex-col">
-                                    <div className="flex items-center gap-1.5">
-                                        <span className="font-label-sm text-label-sm text-on-surface font-semibold">
-                                            KPR Readiness
-                                        </span>
-                                        <span className="font-label-sm text-label-sm px-2 py-0.5 rounded bg-secondary-fixed text-on-secondary-fixed font-bold">
-                                            Skor A+
-                                        </span>
-                                    </div>
-                                    <span className="font-body-sm text-body-sm text-outline font-medium">
-                                        Plafon Rp 650.000.000
+                                    <span className="font-label-sm text-label-sm text-on-surface font-semibold">
+                                        Suku Bunga Terbaik
+                                    </span>
+                                    <span className="font-body-sm text-body-sm text-secondary font-bold">
+                                        Mulai 4.75% Fixed Promo
                                     </span>
                                 </div>
                             </div>
                             <div className="absolute -bottom-6 -left-2 sm:-left-4 bg-surface-container-lowest/95 backdrop-blur-md shadow-xl rounded-xl p-3.5 flex items-center gap-3 border border-surface-container-high">
                                 <div className="w-10 h-10 rounded-full bg-secondary-container/20 flex items-center justify-center text-secondary">
                                     <span className="material-symbols-outlined text-[22px]">
-                                        domain_verification
+                                        account_balance
                                     </span>
                                 </div>
                                 <div className="flex flex-col">
                                     <span className="font-label-sm text-label-sm text-on-surface font-semibold">
-                                        Status SP3K: Disetujui Bank ✓
+                                        Kemitraan Multi-Bank Resmi
                                     </span>
-                                    <span className="font-body-sm text-body-sm text-secondary font-bold">
-                                        Bunga Spesial 4.88% Fixed 3 Thn
+                                    <span className="font-body-sm text-body-sm text-outline font-medium">
+                                        Bank BTN, Mandiri, BCA &amp; BSI
                                     </span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
                 <div className="mt-14 relative z-20">
                     <div className="bg-surface-container-lowest rounded-2xl p-4 lg:p-6 shadow-xl border border-surface-container">
                         <form

@@ -10,6 +10,7 @@ const navItems = [
     { id: "kalkulator-kpr", label: "Simulasi KPR", href: "#kalkulator-kpr" },
     { id: "alur-pengajuan", label: "Alur Pengajuan", href: "#alur-pengajuan" },
     { id: "mitra-bank", label: "Mitra Bank", href: "#mitra-bank" },
+    { id: "faq", label: "FAQ", href: "#faq" },
 ];
 
 const sectionOrder = [
@@ -18,6 +19,7 @@ const sectionOrder = [
     "kalkulator-kpr",
     "cari-hunian",
     "alur-pengajuan",
+    "faq",
 ];
 
 export default function Navbar() {
@@ -35,7 +37,7 @@ export default function Navbar() {
                 window.innerHeight + window.scrollY >=
                 document.documentElement.scrollHeight - 60
             ) {
-                setActiveSection("alur-pengajuan");
+                setActiveSection("faq");
                 return;
             }
 
@@ -112,6 +114,7 @@ export default function Navbar() {
                         </span>
                     </div>
                 </Link>
+
                 <nav className="hidden xl:flex items-center gap-1 p-1">
                     {navItems.map((item) => {
                         const isActive = activeSection === item.id;
@@ -131,11 +134,12 @@ export default function Navbar() {
                         );
                     })}
                 </nav>
+
                 <div className="flex items-center gap-2 sm:gap-3">
                     <a
                         href="#kalkulator-kpr"
                         onClick={(e) => handleNavClick(e, "kalkulator-kpr")}
-                        className="inline-flex items-center justify-center font-label-md text-label-md px-4 py-2.5 rounded-lg bg-primary text-on-primary hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-sm font-semibold cursor-pointer"
+                        className="inline-flex items-center justify-center font-label-md text-label-md px-5 py-2.5 rounded-lg bg-primary text-on-primary hover:bg-primary-container hover:text-on-primary-container transition-colors shadow-sm font-semibold cursor-pointer"
                     >
                         Simulasi KPR
                     </a>
@@ -151,6 +155,7 @@ export default function Navbar() {
                     </button>
                 </div>
             </div>
+
             {mobileMenuOpen && (
                 <div className="xl:hidden border-t border-surface-container-high bg-surface-container-lowest px-4 py-4 space-y-2 shadow-lg">
                     {navItems.map((item) => {
